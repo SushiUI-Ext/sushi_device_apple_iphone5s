@@ -4,10 +4,6 @@ ZSH != command -v zsh 2>/dev/null
 .error Zsh not present!
 .endif
 
-SHELL := ${ZSH}
-.SHELLFLAGS := -e -c
-.ONESHELL:
-
 V ?= 0
 BETA ?= 0
 
@@ -58,32 +54,32 @@ ENVSETUP := envsetup.sh
 all: check-env sushi-compact
 
 check-env:
-	${Q}source ./$(ENVSETUP)
-	${Q}if ! type sushidevinfo >/dev/null 2>&1; then
-		echo "ERROR: Failed to load SushiUI environment."
-		exit 1
-	fi
-	${Q}echo "SushiUI Extended: $$VERSION"
-	${Q}echo "Device: $$DEVICE"
-	${Q}echo "Host OS: ${HOST_OS}"
-	${Q}echo "Kernel: ${UNAME_S}"
+	${Q}${ZSH} -ec 'source ./$(ENVSETUP); \
+	if ! type sushidevinfo >/dev/null 2>&1; then \
+		echo "ERROR: Failed to load SushiUI environment."; \
+		exit 1; \
+	fi; \
+	echo "SushiUI Extended: $$VERSION"; \
+	echo "Device: $$DEVICE"; \
+	echo "Host OS: ${HOST_OS}"; \
+	echo "Kernel: ${UNAME_S}"'
 
 sushi-prepare: check-env
-	${Q}source ./$(ENVSETUP)
-	${Q}rm -rf "${NZOUTPUT_DIR}"
-	${Q}mkdir -p "${NZOUTPUT_DIR}"
-	${Q}cp -a "${MODULE_SOURCE_DIR}/." "${NZOUTPUT_DIR}/"
-	${Q}zsh "${MAKEFILE_DIR}/apkdown.sh"
-	${Q}zsh "${MAKEFILE_DIR}/systemfiles.sh"
+	${Q}${ZSH} -ec 'source ./$(ENVSETUP); \
+	rm -rf "${NZOUTPUT_DIR}"; \
+	mkdir -p "${NZOUTPUT_DIR}"; \
+	cp -a "${MODULE_SOURCE_DIR}/." "${NZOUTPUT_DIR}/"; \
+	${ZSH} "${MAKEFILE_DIR}/apkdown.sh"; \
+	${ZSH} "${MAKEFILE_DIR}/systemfiles.sh"'
 
 sushi-compact: sushi-prepare
-	${Q}source ./$(ENVSETUP)
-	${Q}mkdir -p "${OUTPUT_DIR}"
-	${Q}ZIP_NAME="${PROJECT}_$${VERSION}_$${DEVICE}.zip"
-	${Q}rm -f "${OUTPUT_DIR}/$${ZIP_NAME}"
-	${Q}cd "${NZOUTPUT_DIR}"
-	${Q}zip -r "../output/$${ZIP_NAME}" . >/dev/null
-	${Q}echo "Created ${OUTPUT_DIR}/$${ZIP_NAME}."
+	${Q}${ZSH} -ec 'source ./$(ENVSETUP); \
+	mkdir -p "${OUTPUT_DIR}"; \
+	ZIP_NAME="${PROJECT}_$${VERSION}_$${DEVICE}.zip"; \
+	rm -f "${OUTPUT_DIR}/$${ZIP_NAME}"; \
+	cd "${NZOUTPUT_DIR}"; \
+	zip -r "../output/$${ZIP_NAME}" . >/dev/null; \
+	echo "Created ${OUTPUT_DIR}/$${ZIP_NAME}."'
 
 clean:
 	${Q}rm -rf "${NZOUTPUT_DIR}" "${OUTPUT_DIR}"
